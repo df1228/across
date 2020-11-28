@@ -19,7 +19,6 @@ set -e
 #
 # Git commit from https://github.com/docker/docker-install when
 # the script was uploaded (Should only be modified by upload job):
-SCRIPT_COMMIT_SHA="26ff363bcf3b3f5a00498ac43694bf1c7d9ce16c"
 
 DRY_RUN=${DRY_RUN:-}
 while [ $# -gt 0 ]; do
@@ -112,10 +111,6 @@ do_install() {
 	lsb_dist=$(get_distribution)
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 
-	# tempfile & rm it when exit
-	trap 'rm -f "$TMPFILE"' EXIT
-	TMPFILE=$(mktemp) || exit 1
-
 	case "$lsb_dist" in
 
 		ubuntu)
@@ -162,6 +157,10 @@ do_install() {
 	# # Check if this is a forked Linux distro
 	# check_forked
 
+  # tempfile & rm it when exit
+	trap 'rm -f "$TMPFILE"' EXIT
+	TMPFILE=$(mktemp) || exit 1
+
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
 		ubuntu|debian)
@@ -173,9 +172,21 @@ do_install() {
 
 				$sh_c "apt-get update -y -qq >/dev/null"
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -qq $pre_reqs >/dev/null"
-								# dpkg install caddy from official release, this will install systemd service
-								caddyURL="$(wget -qO-  https://api.github.com/repos/caddyserver/caddy/releases | grep -E "browser_download_url.*linux_amd64\.deb" | cut -f4 -d\" | head -n1)"
-								wget -O $TMPFILE $caddyURL && dpkg -i $TMPFILE
+        # dpkg install caddy from official release, this will install systemd service
+        caddyURL="$(wget -qO-  https://api.github.com/repos/caddyserver/caddy/releases | grep -E "browser_download_url.*linux_amd64\.deb" | cut -f4 -d\" | head -n1)"
+        wget -O $TMPFILE $caddyURL && sudo dpkg -i $TMPFILE
+
+        wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xzf go1.15.linux-amd64.tar.gz
+        echo export PATH=/usr/local/go/bin:$PATH >> ~/.bash_profile
+        source ~/.bash_profile
+
+        # replace caddy with xcaddy build one which with a forked forwardproxy plugin
+        sudo rm -rf /usr/bin/caddy
+        go get -u -v github.com/caddyserver/xcaddy/cmd/xcaddy
+        sudo ~/go/bin/xcaddy build --output /usr/bin/caddy --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
+        sudo setcap cap_net_bind_service=+ep /usr/bin/caddy
+        sudo chmod +x /usr/bin/caddy
 			)
 			exit 0
 			;;
@@ -246,19 +257,9 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager install -y -q docker-ce$pkg_version"
 			)
-			echo_docker_as_nonroot
 			exit 0
 			;;
 		*)
-			if [ -z "$lsb_dist" ]; then
-				if is_darwin; then
-					echo
-					echo "ERROR: Unsupported operating system 'macOS'"
-					echo "Please get Docker Desktop from https://www.docker.com/products/docker-desktop"
-					echo
-					exit 1
-				fi
-			fi
 			echo
 			echo "ERROR: Unsupported distribution '$lsb_dist'"
 			echo
