@@ -11,9 +11,9 @@ source ~/.bash_profile
 #
 #              https://github.com/caddyserver/xcaddy
 #
-go get -u -v github.com/caddyserver/xcaddy/cmd/xcaddy
 # 如果不ln,ubuntu 20.04 会报错 go binary not in PATH
 sudo ln -sf /usr/local/go/bin/go /usr/local/bin/go
+go get -u -v github.com/caddyserver/xcaddy/cmd/xcaddy
 sudo ~/go/bin/xcaddy build --output /usr/bin/caddy --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
 sudo setcap cap_net_bind_service=+ep /usr/bin/caddy
 sudo chmod +x /usr/bin/caddy
