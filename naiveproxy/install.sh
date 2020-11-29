@@ -60,9 +60,10 @@ sudo wget -O /etc/systemd/system/caddy.service https://raw.githubusercontent.com
 
 
 # Caddyfile
-sudo mkdir -p /usr/share/caddy
+sudo mkdir -p /var/www/html
 sudo mkdir -p /etc/caddy
-echo "Hello, 世界!" | sudo tee /usr/share/caddy/index.html
+sudo chown -R caddy:caddy /var/www/html
+echo "Hello, 世界!" | sudo tee /var/www/html/index.html
 echo
 
 username="$(tr -dc 'a-z0-9A-Z' </dev/urandom | head -c 16)"
@@ -71,6 +72,7 @@ password="$(tr -dc 'a-z0-9A-Z' </dev/urandom | head -c 16)"
 # config caddy json
 cat <<EOF | sudo tee /etc/caddy/Caddyfile
 :443, $domain
+log
 route {
   forward_proxy {
     basic_auth $username $password
