@@ -1,0 +1,15 @@
+[Unit]
+Description=go-shadowsocks2 Server
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+User=root
+Environment="PORT=80" 
+Environment="CIPHER=AEAD_CHACHA20_POLY1305" 
+Environment="PASSWORD=passw0rd"
+ExecStart=/usr/local/bin/go-shadowsocks2 -s ss://${CIPHER}:${PASSWORD}@:${PORT} -verbose
+
+[Install]
+WantedBy = multi-user.target

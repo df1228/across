@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
+# description:  centos/amazon linux/ubuntu/debian naiveproxy installer
+# project url: https://github.com/klzgrad/naiveproxy
+# install: bash <(curl -s https://raw.githubusercontent.com/dfang/across/master/naiveproxy/install.sh) my.domain.com
+# uninstall: remove caddy and go
+
 GO_VERSION=1.15
+
+echo "PLEASE resolve your domain to this host so that caddy can get the certificate ......"
 
 [[ $# == 1 ]] && domain="$1" || { echo Err !!! Useage: bash this_script.sh my.domain.com; exit 1; }
 
@@ -20,19 +27,18 @@ fi
 # ------------ Install go ------------------
 #
 #
-wget https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz
+wget -O go${GO_VERSION}.linux-amd64.tar.gz https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
-echo export PATH=/usr/local/go/bin:$PATH >> ~/.bash_profile
-source ~/.bash_profile
+echo export PATH=/usr/local/go/bin:$PATH >> ~/.bash_profile && source ~/.bash_profile
 
 # ------------ Build caddy with forked forwardproxy plugin ------------------
 #
 #              https://github.com/caddyserver/xcaddy
 #
 # 如果不ln,ubuntu 20.04 会报错 go binary not in PATH
-sudo ln -sf /usr/local/go/bin/go /usr/local/bin/go
-sudo ln -sf /usr/local/go/bin/go /usr/bin/go
-# sudo cp -f /usr/local/go/bin/go /usr/local/bin/go
+# sudo ln -sf /usr/local/go/bin/go /usr/local/bin/go
+# sudo ln -sf /usr/local/go/bin/go /usr/bin/go
+sudo cp -f /usr/local/go/bin/go /usr/local/bin/go
 go get -u -v github.com/caddyserver/xcaddy/cmd/xcaddy
 sudo ~/go/bin/xcaddy build --output /usr/bin/caddy --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
 sudo setcap cap_net_bind_service=+ep /usr/bin/caddy
@@ -42,7 +48,6 @@ sudo chmod +x /usr/bin/caddy
 #
 #             https://caddyserver.com/docs/install
 #
-sudo mv caddy /usr/bin/
 sudo groupadd --system caddy
 sudo useradd --system \
     --gid caddy \
@@ -93,7 +98,7 @@ echo
 echo
 echo "Project URL: https://github.com/klzgrad/naiveproxy"
 echo
-echo you may want to config your clientlike this:
+echo you may want to config your client like this:
 echo
 cat <<-EOF
 {
