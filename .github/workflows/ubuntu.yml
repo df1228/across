@@ -18,7 +18,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -29,8 +29,8 @@ jobs:
       - name: Install naiveproxy
         run: |
           cd naiveproxy
-          sudo chmod +x ./ubuntu.sh
-          ./ubuntu.sh
+          sudo chmod +x ./install.sh
+          ./install.sh
 
       # Runs a set of commands using the runners shell
       - name: Test
