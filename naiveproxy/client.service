@@ -1,0 +1,37 @@
+# naive.service
+#
+# For running naive proxy as client
+#
+# Make sure the ExecStart and ExecReload commands are correct
+# for your installation.
+#
+# See https://github.com/klzgrad/naiveproxy for instructions.
+#
+#   {
+#       "listen": "socks://127.0.0.1:1080",
+#       "proxy": "https://user:password@domain:port",
+#       "log": ""
+#   }
+#
+
+[Unit]
+Description=naive proxy client
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+User=root
+ExecStart=/usr/local/bin/naive /etc/naive/config.json
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy = multi-user.target
+
+
+

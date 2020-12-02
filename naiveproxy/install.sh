@@ -72,6 +72,7 @@ password="$(tr -dc 'a-z0-9A-Z' </dev/urandom | head -c 16)"
 # config caddy json
 cat <<EOF | sudo tee /etc/caddy/Caddyfile
 :443, $domain
+# tls $email
 log
 route {
   forward_proxy {
