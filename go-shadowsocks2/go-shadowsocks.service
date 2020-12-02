@@ -10,6 +10,12 @@ Environment="PORT=80"
 Environment="CIPHER=AEAD_CHACHA20_POLY1305" 
 Environment="PASSWORD=passw0rd"
 ExecStart=/usr/local/bin/go-shadowsocks2 -s ss://${CIPHER}:${PASSWORD}@:${PORT} -verbose
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 
 [Install]
 WantedBy = multi-user.target

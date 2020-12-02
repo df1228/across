@@ -1,0 +1,23 @@
+#
+# for documentation see
+# https://github.com/p4gefau1t/trojan-go
+#
+#
+[Unit]
+Description=trojan
+Documentation=https://github.com/p4gefau1t/trojan-go
+After=network.target
+
+[Service]
+Type=simple
+StandardError=journal
+PIDFile=/tmp/trojan.pid
+ExecStart=/usr/local/bin/trojan-go -config /etc/trojan/conf/server.json
+ExecReload=
+ExecStop=/etc/trojan/bin/trojan-go
+LimitNOFILE=51200
+Restart=on-failure
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target
